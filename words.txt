@@ -38,7 +38,6 @@ and
 a
 dude
 called
-<@352867028719370252>
 and,
 not
 to
@@ -46,7 +45,6 @@ forget,
 a
 man
 named
-<@246574201283018752>
 of
 course.
 They
