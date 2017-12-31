@@ -1,4 +1,14 @@
-#main file
+# Variables you might need to change
+
+#replace with the token of your bot
+BOT_TOKEN = "INSERT TOKEN HERE!"
+
+#replace with the id of your server
+# id of the werewolves server is "375597071094382603"
+# id of the other replica server is "384679986054955008"
+SERVER_ID = "395966781589815296"
+
+#don't edit stuff below here unless you know what you're doing
 import discord
 import asyncio
 import pickle
@@ -6,10 +16,6 @@ import sys
 import random
 
 client = discord.Client()
-
-#globals
-SERVER_ID = "395966781589815296"
-# this will only ever run on one server at once.
 
 T_CHANNEL = H_CHANNEL = GM_ROLE = "" # fill these in later in the code
 
@@ -24,7 +30,7 @@ def already_set_up(): # figures out whether the bot has already been set up
         return False
 
 @client.event
-async def on_ready(): #when bot turned on
+async def on_ready(): # here be dragons
 
     global H_CHANNEL # we need to be able to modify these
     global T_CHANNEL
@@ -107,7 +113,8 @@ async def on_message(msg):
 
     if H_CHANNEL != "" and msg.channel == H_CHANNEL:
         if not (msg.author == msg.server.me or GM_ROLE in msg.author.roles) :
-            await client.delete_message(msg)
+            if not (msg.content.isdigit() and 0 <= int(msg.content) <= 9):
+                await client.delete_message(msg)
 
 
 async def make_wordlist(fhandle, num=10):
@@ -122,7 +129,7 @@ async def make_wordlist(fhandle, num=10):
     return emb, lu
 
 # word list loop
-async def ghost_loop():
+async def ghost_loop(): # here be more dragons
     await client.wait_until_ready()
     convo = []
     sentence_convo = []
@@ -171,4 +178,4 @@ async def ghost_loop():
                 await client.delete_message(sentence_convo[0])
             else:
                 await client.delete_messages(sentence_convo)
-client.run("Mzk1OTY2MjkwNTY2ODQwMzMx.DSaj4A.QCe7hTqF_QbRWFijYNjpdGHWeyk")
+client.run(BOT_TOKEN)
