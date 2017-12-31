@@ -4,7 +4,7 @@ This bot was created to add some automated functionality to there werewolves dis
 Created by ed588 for randium and co at the werewolves server.
 
 ## What it does
-The bot allows dead participants to choose a word out of a list of 10 every 15 seconds. These words get concatenated into a sentence, and when it reaches a `.`, `?`, or `!`, it gets sent to a public channel.
+The bot allows dead participants to choose a word out of a list of 10 every 15 seconds. These words get concatenated into a sentence, and when it reaches a `.`, `?`, or `!`, it gets sent to a public channel. See [the specification from randium](spec.md) for more info.
 
 Words are stored in `words.txt`, separated by newlines.
 
