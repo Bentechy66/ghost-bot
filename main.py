@@ -141,14 +141,17 @@ async def ghost_loop(): # here be more dragons
             if tomsg != "":
                 await client.delete_message(tomsg)
                 tomsg = ""
-            #make word list
-            with open("words.txt") as wh:
-                wordlist, lookup = await make_wordlist(wh)
 
-            #send word list
-            #try:
-            startmsg = await client.send_message(H_CHANNEL, embed=wordlist)
-            #except:
+            wordlist_sent = False
+            while not wordlist_sent:
+                try:
+                    with open("words.txt") as wh:
+                        wordlist, lookup = await make_wordlist(wh)
+                    startmsg = await client.send_message(H_CHANNEL, embed=wordlist)
+                    wordlist_sent = True
+                except discord.errors.HTTPException:
+                    print("failed to send wordlist, trying again")
+                    wordlist_sent = False # just to make sure -_-
 
 
             #get number
