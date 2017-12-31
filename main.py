@@ -111,8 +111,7 @@ async def on_message(msg):
 
     if H_CHANNEL != "" and msg.channel == H_CHANNEL:
         if not (msg.author == msg.server.me or GM_ROLE in msg.author.roles) :
-            if not (msg.content.isdigit() and 0 <= int(msg.content) <= 9):
-                await client.delete_message(msg)
+            await client.delete_message(msg)
 
 
 async def make_wordlist(fhandle, num=10):
@@ -159,7 +158,10 @@ async def ghost_loop(): # here be more dragons
                 await asyncio.sleep(60*5)
             else:
                 await client.delete_message(startmsg)
-                await client.delete_message(respmsg)
+                try:
+                    await client.delete_message(respmsg)
+                except:
+                    pass # the other bit already deleted it hopefully
 
                 sentence_convo.append(await client.send_message(H_CHANNEL, respmsg.author.mention+" says "+lookup[int(respmsg.content)]))
                 sentence += lookup[int(respmsg.content)]+" "
