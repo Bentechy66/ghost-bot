@@ -1,7 +1,7 @@
 # Variables you might need to change
 
 #replace with the token of your bot
-BOT_TOKEN = "INSERT TOKEN HERE!"
+BOT_TOKEN = "INSERT BOT TOKEN HERE!"
 
 #replace with the id of your server
 SERVER_ID = "INSERT SERVER ID HERE"
@@ -146,7 +146,10 @@ async def ghost_loop(): # here be more dragons
                 wordlist, lookup = await make_wordlist(wh)
 
             #send word list
+            #try:
             startmsg = await client.send_message(H_CHANNEL, embed=wordlist)
+            #except:
+
 
             #get number
             respmsg = await client.wait_for_message(timeout=60, channel=H_CHANNEL, check=lambda msg: msg.content.isdigit() and 0 <= int(msg.content) <= 9)
@@ -160,7 +163,7 @@ async def ghost_loop(): # here be more dragons
                 await client.delete_message(startmsg)
                 try:
                     await client.delete_message(respmsg)
-                except:
+                except discord.errors.NotFound:
                     pass # the other bit already deleted it hopefully
 
                 sentence_convo.append(await client.send_message(H_CHANNEL, respmsg.author.mention+" says "+lookup[int(respmsg.content)]))
