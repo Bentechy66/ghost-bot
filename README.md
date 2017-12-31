@@ -26,3 +26,6 @@ Configuration data is stored in `data.dat`: if you need to reset the configurati
 | `!ghost_stop` | Shuts down the bot. Usable by game master only.
 | `!ghost_status` | Gives a nice status message. Usable by game master only.
 | `!ghost_debug_reveal` | Prints a list of global variables and their values to the console. Intended for debugging purposes. Usable by game master only.
+
+## Installation and requirements
+This program requires [discord.py](https://github.com/Rapptz/discord.py/) and therefore python 3.4+. Tested and developed with python 3.6.1. and discord.py 0.16.7.
