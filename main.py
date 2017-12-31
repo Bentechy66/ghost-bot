@@ -4,9 +4,7 @@
 BOT_TOKEN = "INSERT TOKEN HERE!"
 
 #replace with the id of your server
-# id of the werewolves server is "375597071094382603"
-# id of the other replica server is "384679986054955008"
-SERVER_ID = "395966781589815296"
+SERVER_ID = "INSERT SERVER ID HERE"
 
 #don't edit stuff below here unless you know what you're doing
 import discord

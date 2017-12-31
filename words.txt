@@ -1,4 +1,4 @@
-﻿There
+There
 was
 a
 man
@@ -30,12 +30,10 @@ was
 a
 girl
 called
-<@248158876799729664>
 and
 a
 boy
 called
-<@209126872783519745>
 and
 a
 dude
