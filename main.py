@@ -113,6 +113,12 @@ async def on_message(msg):
         if not (msg.author == msg.server.me or GM_ROLE in msg.author.roles) :
             await client.delete_message(msg)
 
+    elif T_CHANNEL != "" and msg.channel == T_CHANNEL:
+        if "beer" in msg.content.lower():
+            await client.add_reaction(msg, "🍺")
+        elif "wine" in msg.content.lower():
+            await client.add_reaction(msg, "🍷")
+
 
 async def make_wordlist(fhandle, num=10):
     fhandle.seek(0)
