@@ -116,7 +116,7 @@ async def on_message(msg):
     elif T_CHANNEL != "" and msg.channel == T_CHANNEL:
         if "beer" in msg.content.lower():
             await client.add_reaction(msg, "🍺")
-        elif "wine" in msg.content.lower():
+        if "wine" in msg.content.lower():
             await client.add_reaction(msg, "🍷")
 
 
