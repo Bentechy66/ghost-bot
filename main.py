@@ -1,3 +1,8 @@
+# WEREWOLVES GHOST BOT
+# by ed588 with contributions from oliverh57 and bentechy66
+# mit licensed, see LICENSE file
+
+
 # Variables you might need to change
 
 #replace with the token of your bot
