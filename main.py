@@ -183,7 +183,7 @@ async def ghost_loop(): # here be more dragons
                 await asyncio.sleep(15)
 
         if sentence != "":
-            await client.send_message(T_CHANNEL, "**Boo!** The ghosts want to say something! They say \""+sentence[:-1]+"\"!")
+            await client.send_message(T_CHANNEL, sentence[:-1])
 
         if sentence_convo:
             if len(sentence_convo) == 1:
