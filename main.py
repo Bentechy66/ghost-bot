@@ -123,8 +123,20 @@ async def on_message(msg):
             await client.add_reaction(msg, "🍺")
         if "wine" in msg.content.lower():
             await client.add_reaction(msg, "🍷")
-
-
+        if "shot" in msg.content.lower():
+            await client.add_reaction(msg, "🥃")
+        if "champagne" in msg.content.lower():
+            await client.add_reaction(msg, "🍾")
+        if "milk" in msg.content.lower():
+            await client.add_reaction(msg, "🥛")
+        if "water" in msg.content.lower():
+            await client.add_reaction(msg, "🚱")
+        if "pee" in msg.content.lower():
+            await client.add_reaction(msg, "🇪")
+            await asyncio.sleep(1) # Make sure reactions are added in the correct order
+            await client.add_reaction(msg, "🇼")
+            
+            
 async def make_wordlist(fhandle, num=10):
     fhandle.seek(0)
     lines = fhandle.readlines()
