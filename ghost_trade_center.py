@@ -8,11 +8,12 @@
 '''
 
 M_CHANNEL = "409085003503239169"
-BOT_TOKEN = "Ur token here"
+BOT_TOKEN = "NDA5MDgzMzAyMTg0NjE1OTM3.DVdCDw.Y3h7Kd-GchXcYaNp_-peJJUfEqE"
 
 from discord.ext import commands
 import sqlite3
-import os  
+import os 
+import re 
 
 
 bot = commands.Bot(command_prefix='$')
@@ -87,7 +88,7 @@ else:
 @bot.command(pass_context=True)
 async def add_item(ctx, user_id, item, quantity):
 	if user_id.isdigit() == False:
-		user_id = user_id.id
+		user_id = re.findall('\d+', user_id)[0]
 	await add_item_to_inventory(user_id, item, quantity)
 	await bot.say("Done. (I hope)")
 
@@ -96,7 +97,7 @@ async def add_item(ctx, user_id, item, quantity):
 async def inv(ctx, user_id):
 
 	if user_id.isdigit() == False:
-		user_id = user_id.id
+		user_id = re.findall('\d+', user_id)[0]
 	rows = await get_inv_by_id(user_id)
 	
 	if rows == "broken":
