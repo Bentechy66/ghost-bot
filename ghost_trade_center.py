@@ -8,7 +8,7 @@
 '''
 
 M_CHANNEL = "409085003503239169"
-BOT_TOKEN = "NDA5MDgzMzAyMTg0NjE1OTM3.DVdCDw.Y3h7Kd-GchXcYaNp_-peJJUfEqE"
+BOT_TOKEN = "I remembered to remove this deffo"
 
 from discord.ext import commands
 import sqlite3
@@ -37,8 +37,17 @@ def setup_db():
 		except:
 			print("Command skipped")
 
+
+async def check_if_investor(user_id):
+	c.execute("SELECT balance FROM players WHERE user_id = ?;", (user_id,))
+	rows = c.fetchall()
+	if rows:
+		return(True)
+	else:
+		return(False)
+
 async def get_inv_by_id(user_id):
-	print("Getting inv")
+	print("Getting inv of " + user_id)
 	c.execute("SELECT * FROM inventory_items WHERE user_id = ?;", (user_id,))
 	print("Fetched from db")
 	rows = c.fetchall()
@@ -58,7 +67,7 @@ async def add_item_to_inventory(user_id, item, quantity):
 			print(r)
 			conn.commit()
 		except:
-			await bot.say("That user has no inventory!")
+			await bot.say("Something went wrong! Try again or contact a bot dev.")
 			return("broken")
 
 async def setup_player(user_id, starterpack):
@@ -82,7 +91,10 @@ else:
 
 
 
-
+async def username(user_id):
+	print("Getting username of " + user_id)
+	mem = await bot.get_user_info(user_id)
+	return mem.name
 
 
 @bot.command(pass_context=True)
@@ -94,7 +106,10 @@ async def add_item(ctx, user_id, item, quantity):
 
 
 @bot.command(pass_context=True)
-async def inv(ctx, user_id):
+async def inv(ctx, user_id=None):
+	if user_id == None:
+		print("Setting UID")
+		user_id = ctx.message.author.id
 
 	if user_id.isdigit() == False:
 		user_id = re.findall('\d+', user_id)[0]
@@ -103,9 +118,12 @@ async def inv(ctx, user_id):
 	if not rows:
 		await bot.say("That user has no inventory!")
 	else:
-		await bot.say("**" + user_id + "**:")
+		#await bot.say("**" + username(user_id) + "**:")
+		inventory = "**" + await username(user_id) + "**:\n"
 		for row in rows:
-			await bot.say(" - " + str(row[1]) + " x " + str(row[2]))
+			inventory+=str(row[1]) + " x " + str(row[2]) + "\n"
+			#await bot.say(" - " + str(row[1]) + " x " + str(row[2]))
+		await bot.say(inventory)
 
 
 
