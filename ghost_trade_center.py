@@ -100,8 +100,8 @@ async def inv(ctx, user_id):
 		user_id = re.findall('\d+', user_id)[0]
 	rows = await get_inv_by_id(user_id)
 	
-	if rows == "broken":
-		pass
+	if not rows:
+		await bot.say("That user has no inventory!")
 	else:
 		await bot.say("**" + user_id + "**:")
 		for row in rows:
