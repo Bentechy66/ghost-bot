@@ -67,7 +67,7 @@ async def add_item_to_inventory(user_id, item, quantity):
 			print(r)
 			conn.commit()
 		except:
-			await bot.say("Something went wrong! Try again or contact a bot dev.")
+			await bot.say("Something went wrong! Try again, or contact a bot dev.")
 			return("broken")
 
 async def setup_player(user_id, starterpack):
@@ -102,7 +102,7 @@ async def add_item(ctx, user_id, item, quantity):
 	if user_id.isdigit() == False:
 		user_id = re.findall('\d+', user_id)[0]
 	await add_item_to_inventory(user_id, item, quantity)
-	await bot.say("Done. (I hope)")
+	await bot.say("Copy that! *(I hope)*")
 
 
 @bot.command(pass_context=True)
@@ -116,9 +116,9 @@ async def inv(ctx, user_id=None):
 	rows = await get_inv_by_id(user_id)
 	
 	if not rows:
-		await bot.say("That user has no inventory!")
+		await bot.say("I am sorry, but the specified user has no inventory!")
 	else:
-		#await bot.say("**" + username(user_id) + "**:")
+		#await bot.say("**__This is the inventory of" + username(user_id) + "__**:")
 		inventory = "**" + await username(user_id) + "**:\n"
 		for row in rows:
 			inventory+=str(row[1]) + " x " + str(row[2]) + "\n"
@@ -135,7 +135,7 @@ async def inv(ctx, user_id=None):
 
 @bot.command(pass_context=True)
 async def test(ctx):
-	await bot.say("ree")
+	await bot.say("Hello! I am alive!")
 
 
 
