@@ -9,6 +9,8 @@
 
 M_CHANNEL = "409085003503239169"
 BOT_TOKEN = "I remembered to remove this deffo"
+MAIN_BOT_ID = "247096918923149313"
+
 
 from discord.ext import commands
 import sqlite3
@@ -38,6 +40,11 @@ def setup_db():
 			print("Command skipped")
 
 
+async def add_user(user_id):
+	c.execute("INSERT INTO players (user_id, balance) VALUES (?, 0);", (user_id,))
+	starterpack(user_id)
+
+
 async def check_if_investor(user_id):
 	c.execute("SELECT balance FROM players WHERE user_id = ?;", (user_id,))
 	rows = c.fetchall()
@@ -55,6 +62,14 @@ async def get_inv_by_id(user_id):
 	print("Returning...")
 	return(rows)
 
+async def get_credits(user_id):
+	try:
+		c.execute("SELECT balance FROM players WHERE user_id = ?;", (user_id,))
+		rows = c.fetchall()
+		return(rows[0])
+	except:
+		return("0")
+
 async def add_item_to_inventory(user_id, item, quantity):
 	try:
 		r = c.execute("INSERT INTO inventory_items (user_id, item, quantity) VALUES (?, ?, ?);", (user_id, item, quantity))
@@ -70,7 +85,7 @@ async def add_item_to_inventory(user_id, item, quantity):
 			await bot.say("Something went wrong! Try again, or contact a bot dev.")
 			return("broken")
 
-async def setup_player(user_id, starterpack):
+async def starterpack(user_id):
 	if starterpack:
 		c.execute("INSERT INTO players (user_id, balance) VALUES (?, 10);", (user_id,))
 		#c.execute("INSERT INTO inventory_items (user_id, item, quantity) VALUES (?, ?, ?);", (user_id, emoji, quantity) #test code; ignore
@@ -114,20 +129,33 @@ async def inv(ctx, user_id=None):
 	if user_id.isdigit() == False:
 		user_id = re.findall('\d+', user_id)[0]
 	rows = await get_inv_by_id(user_id)
+	credits = await get_credits(user_id)
+	credits = str(credits)
 	
 	if not rows:
-		await bot.say("I am sorry, but the specified user has no inventory!")
+		await bot.say("I am sorry, but the specified user has no items in their inventory!\n**Their Ectoplasm balance is :yen: " + credits + ".**")
 	else:
 		#await bot.say("**__This is the inventory of" + username(user_id) + "__**:")
 		inventory = "**" + await username(user_id) + "**:\n"
 		for row in rows:
 			inventory+=str(row[1]) + " x " + str(row[2]) + "\n"
 			#await bot.say(" - " + str(row[1]) + " x " + str(row[2]))
+		inventory+="\n**Ectoplasm balance: :yen: " + credits + ".**"
 		await bot.say(inventory)
 
 
+#GM Commands
 
 
+
+@bot.command(pass_context=True)
+async def interface(ctx, action, *, request):
+	if action == "die" and ctx.message.author.id == MAIN_BOT_ID:
+		try:
+			await add_user(request)
+			await bot.say("Done: " + request)
+		except:
+			await bot.say("Some error occured with request " + request)
 
 
 
