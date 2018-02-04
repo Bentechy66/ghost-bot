@@ -68,7 +68,9 @@ async def get_credits(user_id):
 	try:
 		c.execute("SELECT balance FROM players WHERE user_id = ?;", (user_id,))
 		rows = c.fetchall()
-		return(rows[0])
+		bal = rows[0]
+		bal = str(bal)
+		return(bal)
 	except:
 		return("0")
 
@@ -113,13 +115,20 @@ async def username(user_id):
 	mem = await bot.get_user_info(user_id)
 	return mem.name
 
-
-@bot.command(pass_context=True)
-async def add_item(ctx, user_id, item, quantity):
-	if user_id.isdigit() == False:
-		user_id = re.findall('\d+', user_id)[0]
-	await add_item_to_inventory(user_id, item, quantity)
-	await bot.say("Copy that! *(I hope)*")
+async def add_credits_real(user_id, amount):
+	print("Adding credits to " + user_id + "with $" + amount + " being added")
+	#try:
+	cr = await get_credits(user_id)
+	if str(cr) == "0":
+		c.execute("INSERT INTO players (user_id, balance) VALUES (?, ?)", (user_id, amount))
+		print("Had to insert; not update")
+	else:
+		c.execute("UPDATE players SET balance = balance + ? WHERE user_id = ?", (amount, user_id))
+		print("Had to update; not insert")
+	conn.commit()
+	await bot.say("Added " + cred_emoji + " " + amount + " to " + await username(user_id) + ".")
+	#except:
+	#	await bot.say("Errored; check your command")
 
 
 @bot.command(pass_context=True)
@@ -141,7 +150,7 @@ async def inv(ctx, user_id=None):
 
 	
 	if not rows:
-		await bot.say("I am sorry, but " + await username(user_id) " has no items in their inventory!\n**Their Ectoplasm balance is " + cred_emoji + " " + credits + ".**")
+		await bot.say("I am sorry, but " + await username(user_id) + " has no items in their inventory!\n**Their Ectoplasm balance is " + cred_emoji + " " + credits + ".**")
 	else:
 		#await bot.say("**__This is the inventory of" + username(user_id) + "__**:")
 		inventory = "**" + await username(user_id) + "**:\n"
@@ -155,6 +164,21 @@ async def inv(ctx, user_id=None):
 
 #GM Commands
 
+
+
+@bot.command(pass_context=True)
+async def add_item(ctx, user_id, item, quantity):
+	if user_id.isdigit() == False:
+		user_id = re.findall('\d+', user_id)[0]
+	await add_item_to_inventory(user_id, item, quantity)
+	await bot.say("Copy that! *(I hope)*")
+
+@bot.command(pass_context=True)
+async def add_credits(ctx, user_id, amount):
+	if user_id.isdigit() == False:
+		user_id = re.findall('\d+', user_id)[0]
+		await add_credits_real(user_id, amount)
+		await bot.say("Copy that! *(I hope)*")
 
 
 @bot.command(pass_context=True)
