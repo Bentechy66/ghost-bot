@@ -8,8 +8,10 @@
 '''
 
 M_CHANNEL = "409085003503239169"
-BOT_TOKEN = "I remembered to remove this deffo"
+BOT_TOKEN = "NDA5MDgzMzAyMTg0NjE1OTM3.DVeCVQ.U2PmYm2yfAXMoBCUGCZnrNxF81E"
 MAIN_BOT_ID = "247096918923149313"
+global cred_emoji
+cred_emoji = ":ghost:" # the emoji used for credits (eg :ghost:)
 
 
 from discord.ext import commands
@@ -131,17 +133,24 @@ async def inv(ctx, user_id=None):
 	rows = await get_inv_by_id(user_id)
 	credits = await get_credits(user_id)
 	credits = str(credits)
+	global cred_emoji	
+	cred_emoji_temp = cred_emoji
+	if user_id == "247096918923149313":
+		
+		cred_emoji = ":yen:"
+
 	
 	if not rows:
-		await bot.say("I am sorry, but the specified user has no items in their inventory!\n**Their Ectoplasm balance is :yen: " + credits + ".**")
+		await bot.say("I am sorry, but " + await username(user_id) " has no items in their inventory!\n**Their Ectoplasm balance is " + cred_emoji + " " + credits + ".**")
 	else:
 		#await bot.say("**__This is the inventory of" + username(user_id) + "__**:")
 		inventory = "**" + await username(user_id) + "**:\n"
 		for row in rows:
 			inventory+=str(row[1]) + " x " + str(row[2]) + "\n"
 			#await bot.say(" - " + str(row[1]) + " x " + str(row[2]))
-		inventory+="\n**Ectoplasm balance: :yen: " + credits + ".**"
+		inventory+="\n**Ectoplasm balance: " + cred_emoji + " " + credits + ".**"
 		await bot.say(inventory)
+	cred_emoji = cred_emoji_temp
 
 
 #GM Commands
