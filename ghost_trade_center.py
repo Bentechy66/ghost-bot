@@ -60,8 +60,13 @@ async def get_buy_offers(emoji):
 		await bot.say("No buy offers for {0}!".format(emoji))
 		return("nope")
 
-async def add_market_item(user_id, emoji, price):
+async def add_buy_offer(user_id, emoji, price):
 	c.execute('INSERT INTO buy_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
+	conn.commit()
+
+async def add_sell_offer(user_id, emoji, price):
+	c.execute('INSERT INTO sell_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
+	conn.commit()
 
 async def add_user(user_id):
 	c.execute("INSERT INTO players (user_id, balance) VALUES (?, 0);", (user_id,))
@@ -193,6 +198,11 @@ async def market(ctx, emoji=None):
 
 @bot.command(pass_context=True)
 async def sell(ctx, emoji, price):
+	await add_market_item(ctx.message.author.id, emoji, price)
+	await bot.say("Done hopefully")
+
+@bot.command(pass_context=True)
+async def buy(ctx, emoji, price=None):
 	await add_market_item(ctx.message.author.id, emoji, price)
 	await bot.say("Done hopefully")
 
