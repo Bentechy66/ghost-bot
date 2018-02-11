@@ -60,6 +60,21 @@ async def get_buy_offers(emoji):
 		await bot.say("No buy offers for {0}!".format(emoji))
 		return("nope")
 
+async def get_sell_offers(emoji):
+	if emoji == None:
+		c.execute("SELECT name,user_id,price FROM sell_offers;")
+	else:
+		c.execute("SELECT name,user_id,price FROM sell_offers WHERE name = ?;", (emoji,))
+	rows = c.fetchall()
+	if rows:
+		#yay
+		offers = "**Sell offers for %s**" % (emoji)
+		offers = offers + ""
+		await bot.say(str(rows))
+	else:
+		await bot.say("No sell offers for {0}!".format(emoji))
+		return("nope")
+
 async def add_buy_offer(user_id, emoji, price):
 	c.execute('INSERT INTO buy_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
 	conn.commit()
@@ -67,6 +82,14 @@ async def add_buy_offer(user_id, emoji, price):
 async def add_sell_offer(user_id, emoji, price):
 	c.execute('INSERT INTO sell_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
 	conn.commit()
+
+async def buy_emoji(user_id, emoji, price):
+	#try:
+	c.execute('DELETE FROM sell_offers WHERE name = ? and price = ?;', (emoji,price))
+	conn.commit()
+	await add_item_to_inventory(user_id, emoji, "1")
+	#except:
+	#	await bot.say("No offers for that emoji at that price!")
 
 async def add_user(user_id):
 	c.execute("INSERT INTO players (user_id, balance) VALUES (?, 0);", (user_id,))
@@ -194,16 +217,16 @@ async def inv(ctx, user_id=None):
 
 @bot.command(pass_context=True)
 async def market(ctx, emoji=None):
-	await get_buy_offers(emoji)
+	await get_sell_offers(emoji)
 
 @bot.command(pass_context=True)
 async def sell(ctx, emoji, price):
-	await add_market_item(ctx.message.author.id, emoji, price)
+	await add_sell_offer(ctx.message.author.id, emoji, price)
 	await bot.say("Done hopefully")
 
 @bot.command(pass_context=True)
 async def buy(ctx, emoji, price=None):
-	await add_market_item(ctx.message.author.id, emoji, price)
+	await buy_emoji(ctx.message.author.id, emoji, price)
 	await bot.say("Done hopefully")
 
 #GM Commands
