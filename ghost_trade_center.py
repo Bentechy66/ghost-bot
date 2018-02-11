@@ -42,8 +42,30 @@ def setup_db():
 			print("Command skipped")
 
 
+
+
+
+async def get_buy_offers(emoji):
+	if emoji == None:
+		c.execute("SELECT name,user_id,price FROM buy_offers;")
+	else:
+		c.execute("SELECT name,user_id,price FROM buy_offers WHERE name = ?;", (emoji,))
+	rows = c.fetchall()
+	if rows:
+		#yay
+		offers = "**Buy offers for %s**" % (emoji)
+		offers = offers + ""
+		await bot.say(str(rows))
+	else:
+		await bot.say("No buy offers for {0}!".format(emoji))
+		return("nope")
+
+async def add_market_item(user_id, emoji, price):
+	c.execute('INSERT INTO buy_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
+
 async def add_user(user_id):
 	c.execute("INSERT INTO players (user_id, balance) VALUES (?, 0);", (user_id,))
+	conn.commit()
 	starterpack(user_id)
 
 
@@ -70,6 +92,7 @@ async def get_credits(user_id):
 		rows = c.fetchall()
 		bal = rows[0]
 		bal = str(bal)
+		bal = re.findall(r'\d+', bal)
 		return(bal)
 	except:
 		return("0")
@@ -131,8 +154,11 @@ async def add_credits_real(user_id, amount):
 	#	await bot.say("Errored; check your command")
 
 
-@bot.command(pass_context=True)
+#Player commands
+
+@bot.command(pass_context=True,aliases=["inventory","balance","credits","bal"])
 async def inv(ctx, user_id=None):
+	"""Show your inventory: !inv [player]"""
 	if user_id == None:
 		print("Setting UID")
 		user_id = ctx.message.author.id
@@ -161,9 +187,17 @@ async def inv(ctx, user_id=None):
 		await bot.say(inventory)
 	cred_emoji = cred_emoji_temp
 
+@bot.command(pass_context=True)
+async def market(ctx, emoji=None):
+	await get_buy_offers(emoji)
+
+@bot.command(pass_context=True)
+async def sell(ctx, emoji, price):
+	await add_market_item(ctx.message.author.id, emoji, price)
+	await bot.say("Done hopefully")
 
 #GM Commands
-
+#TODO: Actually check if user is GM
 
 
 @bot.command(pass_context=True)
@@ -177,8 +211,8 @@ async def add_item(ctx, user_id, item, quantity):
 async def add_credits(ctx, user_id, amount):
 	if user_id.isdigit() == False:
 		user_id = re.findall('\d+', user_id)[0]
-		await add_credits_real(user_id, amount)
-		await bot.say("Copy that! *(I hope)*")
+	await add_credits_real(user_id, amount)
+	await bot.say("Copy that! *(I hope)*")
 
 
 @bot.command(pass_context=True)
@@ -194,8 +228,8 @@ async def interface(ctx, action, *, request):
 
 
 
-@bot.command(pass_context=True)
-async def test(ctx):
+@bot.command(pass_context=True,aliases=["test"])
+async def ping(ctx):
 	await bot.say("Hello! I am alive!")
 
 
