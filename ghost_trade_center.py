@@ -80,14 +80,41 @@ async def add_buy_offer(user_id, emoji, price):
 	conn.commit()
 
 async def add_sell_offer(user_id, emoji, price):
-	c.execute('INSERT INTO sell_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
-	conn.commit()
+	inv = await get_inv_by_id(user_id)
+	print("Doin stuff")
+	Ting = False
+	for e in inv:
+		if emoji in e:
+			Ting = True
+	if Ting:
+		print("emoji was in inv")
+		c.execute('INSERT INTO sell_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
+		conn.commit()
+		return(True)
+	else:
+		print("Emoji %s was not in %s" % (emoji, inv))
+		return(False)
 
 async def buy_emoji(user_id, emoji, price):
 	#try:
-	c.execute('DELETE FROM sell_offers WHERE name = ? and price = ?;', (emoji,price))
-	conn.commit()
-	await add_item_to_inventory(user_id, emoji, "1")
+	c.execute("SELECT name,user_id,price FROM sell_offers WHERE name = ? and price = ?;", (emoji,price))
+	rows = c.fetchone()
+	print(str(rows))
+	if rows:
+		cr = "re"
+		cr = await get_credits(user_id)
+		if int(cr) > rows[2]:
+			await add_credits_real(str(rows[1]), str(rows[2]))
+			c.execute('DELETE FROM sell_offers WHERE name = ? and price = ?;', (emoji,price))
+			conn.commit()
+			await remove_item_from_inventory(user_id, emoji, "1")
+			await add_item_to_inventory(user_id, emoji, "1")
+			await remove_credits_real(user_id, str(rows[2]))
+			await bot.say("Success!")
+		else:
+			await bot.say("You don't have enough money to buy that! You have %s credits, you need %s more." % (str(cr), str(int(rows[2]) - int(cr))))
+	else:
+		await bot.say("No offer at that price for that emoji!")
 	#except:
 	#	await bot.say("No offers for that emoji at that price!")
 
@@ -116,18 +143,35 @@ async def get_inv_by_id(user_id):
 
 async def get_credits(user_id):
 	try:
+		print("Getting credits of " + str(user_id))
 		c.execute("SELECT balance FROM players WHERE user_id = ?;", (user_id,))
-		rows = c.fetchall()
+		rows = c.fetchone()
 		bal = rows[0]
 		bal = str(bal)
-		bal = re.findall(r'\d+', bal)
-		return(bal)
+		b = re.findall(r'\d+', str(bal))
+		b = str(b[0])
+		return(str(b))
 	except:
 		return("0")
 
 async def add_item_to_inventory(user_id, item, quantity):
 	try:
 		r = c.execute("INSERT INTO inventory_items (user_id, item, quantity) VALUES (?, ?, ?);", (user_id, item, quantity))
+		print(r)
+		conn.commit()
+	except:
+		try:
+			print("UPDATE not INSERT")
+			r = c.execute("UPDATE inventory_items SET quantity = ? WHERE user_id = ? AND item = ?;", (quantity, user_id, item))
+			print(r)
+			conn.commit()
+		except:
+			await bot.say("Something went wrong! Try again, or contact a bot dev.")
+			return("broken")
+
+async def remove_item_from_inventory(user_id, item, quantity):
+	try:
+		r = c.execute("DELETE FROM inventory_items WHERE user_id = ? and item = ? and quantity = ?;", (user_id, item, quantity))
 		print(r)
 		conn.commit()
 	except:
@@ -177,7 +221,19 @@ async def add_credits_real(user_id, amount):
 		c.execute("UPDATE players SET balance = balance + ? WHERE user_id = ?", (amount, user_id))
 		print("Had to update; not insert")
 	conn.commit()
-	await bot.say("Added " + cred_emoji + " " + amount + " to " + await username(user_id) + ".")
+
+async def remove_credits_real(user_id, amount):
+	print("Removing credits from " + user_id + "with $" + amount + " being removed")
+	#try:
+	cr = await get_credits(user_id)
+	if str(cr) == "0":
+		c.execute("INSERT INTO players (user_id, balance) VALUES (?, ?)", (user_id, 0 - int(amount)))
+		print("Had to insert; not update")
+	else:
+		c.execute("UPDATE players SET balance = balance - ? WHERE user_id = ?", (amount, user_id))
+		print("Had to update; not insert")
+	conn.commit()
+	
 	#except:
 	#	await bot.say("Errored; check your command")
 
@@ -221,16 +277,23 @@ async def market(ctx, emoji=None):
 
 @bot.command(pass_context=True)
 async def sell(ctx, emoji, price):
-	await add_sell_offer(ctx.message.author.id, emoji, price)
-	await bot.say("Done hopefully")
+	if not await add_sell_offer(ctx.message.author.id, emoji, price):
+		await bot.say("You don't have that item in your inventory to sell!")
+	else:
+		await bot.say("Item added to the market!")
 
 @bot.command(pass_context=True)
 async def buy(ctx, emoji, price=None):
 	await buy_emoji(ctx.message.author.id, emoji, price)
-	await bot.say("Done hopefully")
+	#await bot.say("Done hopefully")
+
+
+
 
 #GM Commands
 #TODO: Actually check if user is GM
+
+
 
 
 @bot.command(pass_context=True)
@@ -239,6 +302,14 @@ async def add_item(ctx, user_id, item, quantity):
 		user_id = re.findall('\d+', user_id)[0]
 	await add_item_to_inventory(user_id, item, quantity)
 	await bot.say("Copy that! *(I hope)*")
+
+@bot.command(pass_context=True)
+async def remove_item(ctx, user_id, item, quantity):
+	if user_id.isdigit() == False:
+		user_id = re.findall('\d+', user_id)[0]
+	await remove_item_from_inventory(user_id, item, quantity)
+	await bot.say("Copy that! *(I hope)*")
+
 
 @bot.command(pass_context=True)
 async def add_credits(ctx, user_id, amount):
