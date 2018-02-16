@@ -13,6 +13,7 @@ Created by BenTechy66 for Randium and co on the Werewolves discord.
 M_CHANNEL = "409085003503239169"
 BOT_TOKEN = "NDA5MDgzMzAyMTg0NjE1OTM3.DVeCVQ.U2PmYm2yfAXMoBCUGCZnrNxF81E"
 MAIN_BOT_ID = "247096918923149313"
+GM_ROLE = "414103249914953729"
 global cred_emoji
 cred_emoji = ":ghost:" # the emoji used for credits (eg :ghost:)
 
@@ -197,7 +198,7 @@ async def remove_item_from_inventory(user_id, item, quantity):
 				p = i[2]
 				if int(p) > int(quantity):
 					Temp = True
-				elif p == quantity:
+				elif str(p) == str(quantity):
 					Tmp = True
 				else:
 					pass
@@ -327,7 +328,8 @@ async def buy(ctx, emoji, price=None):
 #GM Commands
 #TODO: Actually check if user is GM
 
-
+async def check_role(user, id):
+	pass
 
 
 @bot.command(pass_context=True)
