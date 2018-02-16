@@ -90,13 +90,11 @@ async def add_sell_offer(user_id, emoji, price):
 		if emoji in e:
 			Ting = True
 	if Ting:
-		if await remove_item_from_inventory(user_id, emoji, "1"):
-			print("emoji was in inv")
-			c.execute('INSERT INTO sell_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
-			conn.commit()
-			return(True)
-		else:
-			return(False)
+		await remove_item_from_inventory(user_id, emoji, "1")
+		print("emoji was in inv")
+		c.execute('INSERT INTO sell_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
+		conn.commit()
+		return(True)
 	else:
 		print("Emoji %s was not in %s" % (emoji, inv))
 		return(False)
