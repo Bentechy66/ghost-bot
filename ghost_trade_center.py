@@ -5,6 +5,9 @@
  | | |_ | '_ \ / _ \/ __| __|    | | '__/ _` |/ _` |/ _ \ | |    / _ \ '_ \| __/ _ \ '__|  | |_| | | | | |
  | |__| | | | | (_) \__ \ |_     | | | | (_| | (_| |  __/ | |___|  __/ | | | ||  __/ |      \__|_| |_| |_|
   \_____|_| |_|\___/|___/\__|    |_|_|  \__,_|\__,_|\___|  \_____\___|_| |_|\__\___|_| 
+
+Created by BenTechy66 for Randium and co on the Werewolves discord.
+
 '''
 
 M_CHANNEL = "409085003503239169"
@@ -107,7 +110,7 @@ async def buy_emoji(user_id, emoji, price):
 			await add_credits_real(str(rows[1]), str(rows[2]))
 			c.execute('DELETE FROM sell_offers WHERE name = ? and price = ?;', (emoji,price))
 			conn.commit()
-			await remove_item_from_inventory(user_id, emoji, "1")
+			await remove_item_from_inventory(str(rows[1]), emoji, "1")
 			await add_item_to_inventory(user_id, emoji, "1")
 			await remove_credits_real(user_id, str(rows[2]))
 			await bot.say("Success!")
@@ -156,9 +159,23 @@ async def get_credits(user_id):
 
 async def add_item_to_inventory(user_id, item, quantity):
 	try:
-		r = c.execute("INSERT INTO inventory_items (user_id, item, quantity) VALUES (?, ?, ?);", (user_id, item, quantity))
-		print(r)
-		conn.commit()
+		e = await get_inv_by_id(user_id)
+		Temp = False
+		for i in e:
+			if item in i:
+				Temp = True
+			else:
+				pass
+
+		if Temp:
+			r = c.execute("UPDATE inventory_items SET quantity = quantity + ? WHERE user_id = ? AND item = ?;", (quantity, user_id, item))
+			print(r)
+			conn.commit()
+		else:
+			r = c.execute("INSERT INTO inventory_items (user_id, item, quantity) VALUES (?, ?, ?);", (user_id, item, quantity))
+			print(r)
+			conn.commit()
+
 	except:
 		try:
 			print("UPDATE not INSERT")
@@ -170,19 +187,35 @@ async def add_item_to_inventory(user_id, item, quantity):
 			return("broken")
 
 async def remove_item_from_inventory(user_id, item, quantity):
-	try:
+#try:
+	e = await get_inv_by_id(user_id)
+	Temp = False
+	Tmp = False
+	for i in e:
+		if item in i:
+			p = i[2]
+			if int(p) > int(quantity):
+				Temp = True
+			elif p == quantity:
+				Tmp = True
+			else:
+				pass
+
+	if Temp:
+		r = c.execute("UPDATE inventory_items SET quantity = quantity - ? WHERE user_id = ? AND item = ?;", (quantity, user_id, item))
+		print(r)
+		conn.commit()
+	elif Tmp:
 		r = c.execute("DELETE FROM inventory_items WHERE user_id = ? and item = ? and quantity = ?;", (user_id, item, quantity))
 		print(r)
 		conn.commit()
-	except:
-		try:
-			print("UPDATE not INSERT")
-			r = c.execute("UPDATE inventory_items SET quantity = ? WHERE user_id = ? AND item = ?;", (quantity, user_id, item))
-			print(r)
-			conn.commit()
-		except:
-			await bot.say("Something went wrong! Try again, or contact a bot dev.")
-			return("broken")
+
+	else:
+		await bot.say("There's none of that item in the inventory!")
+		return("broken")
+#except:
+		await bot.say("Something went wrong when `Removing item from inventory`! Try again, or contact a bot dev.")
+		return("broken")
 
 async def starterpack(user_id):
 	if starterpack:
