@@ -187,35 +187,35 @@ async def add_item_to_inventory(user_id, item, quantity):
 			return("broken")
 
 async def remove_item_from_inventory(user_id, item, quantity):
-#try:
-	e = await get_inv_by_id(user_id)
-	Temp = False
-	Tmp = False
-	for i in e:
-		if item in i:
-			p = i[2]
-			if int(p) > int(quantity):
-				Temp = True
-			elif p == quantity:
-				Tmp = True
-			else:
-				pass
+	try:
+		e = await get_inv_by_id(user_id)
+		Temp = False
+		Tmp = False
+		for i in e:
+			if item in i:
+				p = i[2]
+				if int(p) > int(quantity):
+					Temp = True
+				elif p == quantity:
+					Tmp = True
+				else:
+					pass
 
-	if Temp:
-		r = c.execute("UPDATE inventory_items SET quantity = quantity - ? WHERE user_id = ? AND item = ?;", (quantity, user_id, item))
-		print(r)
-		conn.commit()
-	elif Tmp:
-		r = c.execute("DELETE FROM inventory_items WHERE user_id = ? and item = ? and quantity = ?;", (user_id, item, quantity))
-		print(r)
-		conn.commit()
+		if Temp:
+			r = c.execute("UPDATE inventory_items SET quantity = quantity - ? WHERE user_id = ? AND item = ?;", (quantity, user_id, item))
+			print(r)
+			conn.commit()
+		elif Tmp:
+			r = c.execute("DELETE FROM inventory_items WHERE user_id = ? and item = ? and quantity = ?;", (user_id, item, quantity))
+			print(r)
+			conn.commit()
 
-	else:
-		await bot.say("There's none of that item in the inventory!")
-		return("broken")
-#except:
-		await bot.say("Something went wrong when `Removing item from inventory`! Try again, or contact a bot dev.")
-		return("broken")
+		else:
+			await bot.say("There's none of that item in the inventory!")
+			return("broken")
+	except:
+			await bot.say("Something went wrong when `Removing item from inventory`! Try again, or contact a bot dev.")
+			return("broken")
 
 async def starterpack(user_id):
 	if starterpack:
