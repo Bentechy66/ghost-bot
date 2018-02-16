@@ -90,10 +90,13 @@ async def add_sell_offer(user_id, emoji, price):
 		if emoji in e:
 			Ting = True
 	if Ting:
-		print("emoji was in inv")
-		c.execute('INSERT INTO sell_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
-		conn.commit()
-		return(True)
+		if await remove_item_from_inventory(user_id, emoji, "1"):
+			print("emoji was in inv")
+			c.execute('INSERT INTO sell_offers (name, user_id, price) VALUES (?, ?, ?);', (emoji,user_id,price))
+			conn.commit()
+			return(True)
+		else:
+			return(False)
 	else:
 		print("Emoji %s was not in %s" % (emoji, inv))
 		return(False)
@@ -110,7 +113,7 @@ async def buy_emoji(user_id, emoji, price):
 			await add_credits_real(str(rows[1]), str(rows[2]))
 			c.execute('DELETE FROM sell_offers WHERE name = ? and price = ?;', (emoji,price))
 			conn.commit()
-			await remove_item_from_inventory(str(rows[1]), emoji, "1")
+			#await remove_item_from_inventory(str(rows[1]), emoji, "1")
 			await add_item_to_inventory(user_id, emoji, "1")
 			await remove_credits_real(user_id, str(rows[2]))
 			await bot.say("Success!")
