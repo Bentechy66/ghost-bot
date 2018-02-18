@@ -113,7 +113,7 @@ async def buy_emoji(user_id, emoji, price):
 			#c.execute('DELETE FROM sell_offers WHERE name = ? and price = ? LIMIT 1;', (emoji,price))
 			c.execute('SELECT ROWID FROM sell_offers WHERE name = ? and price = ?', (emoji, price))
 			a = c.fetchone()
-			c.execute('DELETE FROM sell_offers WHERE ROWID = ?', (str(a[0])))
+			c.execute('DELETE FROM sell_offers WHERE ROWID = ?', (str(a[0]),))
 			conn.commit()
 			#await remove_item_from_inventory(str(rows[1]), emoji, "1")
 			await add_item_to_inventory(user_id, emoji, "1")
