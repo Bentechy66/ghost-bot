@@ -74,7 +74,7 @@ async def get_sell_offers(emoji):
 		#yay
 		offers = "**Sell offers for %s**" % (emoji)
 		offers = offers + ""
-		await bot.say(str(rows))
+		return(rows)
 	else:
 		await bot.say("No sell offers for {0}!".format(emoji))
 		return("nope")
@@ -311,7 +311,13 @@ async def inv(ctx, user_id=None):
 
 @bot.command(pass_context=True)
 async def market(ctx, emoji=None):
-	await get_sell_offers(emoji)
+	msg = ""
+	s_o = await get_sell_offers(emoji)
+	msg = msg + "**Sell Offers:**"
+	for offer in s_o:
+		msg = msg + "\n - " + str(offer[0]) + " for " + cred_emoji + str(offer[2])
+
+	await bot.say(msg)
 
 @bot.command(pass_context=True)
 async def sell(ctx, emoji, price):
