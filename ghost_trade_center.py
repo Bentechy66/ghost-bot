@@ -1,17 +1,17 @@
-'''                                                                                         _             
-   _____ _               _     _______            _         _____           _              | |             
-  / ____| |             | |   |__   __|          | |       / ____|         | |             | |_ _ __ ___  
+'''                                                                                         _
+   _____ _               _     _______            _         _____           _              | |
+  / ____| |             | |   |__   __|          | |       / ____|         | |             | |_ _ __ ___
  | |  __| |__   ___  ___| |_     | |_ __ __ _  __| | ___  | |     ___ _ __ | |_ ___ _ __   | __| '_ ` _ \
  | | |_ | '_ \ / _ \/ __| __|    | | '__/ _` |/ _` |/ _ \ | |    / _ \ '_ \| __/ _ \ '__|  | |_| | | | | |
  | |__| | | | | (_) \__ \ |_     | | | | (_| | (_| |  __/ | |___|  __/ | | | ||  __/ |      \__|_| |_| |_|
-  \_____|_| |_|\___/|___/\__|    |_|_|  \__,_|\__,_|\___|  \_____\___|_| |_|\__\___|_| 
+  \_____|_| |_|\___/|___/\__|    |_|_|  \__,_|\__,_|\___|  \_____\___|_| |_|\__\___|_|
 
 Created by BenTechy66 for Randium and co on the Werewolves discord.
 
 '''
 
 M_CHANNEL = "409085003503239169"
-BOT_TOKEN = "NDA5MDgzMzAyMTg0NjE1OTM3.DVeCVQ.U2PmYm2yfAXMoBCUGCZnrNxF81E"
+BOT_TOKEN = "NDA5MDgzMzAyMTg0NjE1OTM3.DcCUuQ.NOAWOUEpHboAsUR19wa6rnXaN7A"
 MAIN_BOT_ID = "247096918923149313"
 GM_ROLE = "414103249914953729"
 global cred_emoji
@@ -20,8 +20,8 @@ cred_emoji = ":ghost:" # the emoji used for credits (eg :ghost:)
 
 from discord.ext import commands
 import sqlite3
-import os 
-import re 
+import os
+import re
 
 
 bot = commands.Bot(command_prefix='$')
@@ -102,27 +102,50 @@ async def add_sell_offer(user_id, emoji, price):
 
 async def buy_emoji(user_id, emoji, price):
 	#try:
-	c.execute("SELECT name,user_id,price FROM sell_offers WHERE name = ? and price = ?;", (emoji,price))
-	rows = c.fetchone()
-	print(str(rows))
-	if rows:
-		cr = "re"
-		cr = await get_credits(user_id)
-		if int(cr) > rows[2]:
-			await add_credits_real(str(rows[1]), str(rows[2]))
-			#c.execute('DELETE FROM sell_offers WHERE name = ? and price = ? LIMIT 1;', (emoji,price))
-			c.execute('SELECT ROWID FROM sell_offers WHERE name = ? and price = ?', (emoji, price))
-			a = c.fetchone()
-			c.execute('DELETE FROM sell_offers WHERE ROWID = ?', (str(a[0]),))
-			conn.commit()
-			#await remove_item_from_inventory(str(rows[1]), emoji, "1")
-			await add_item_to_inventory(user_id, emoji, "1")
-			await remove_credits_real(user_id, str(rows[2]))
-			await bot.say("Success!")
+	if price != None:
+		c.execute("SELECT name,user_id,price FROM sell_offers WHERE name = ? and price = ?;", (emoji,price))
+		rows = c.fetchone()
+		print(str(rows))
+		if rows:
+			cr = "re"
+			cr = await get_credits(user_id)
+			if int(cr) > rows[2]:
+				await add_credits_real(str(rows[1]), str(rows[2]))
+				#c.execute('DELETE FROM sell_offers WHERE name = ? and price = ? LIMIT 1;', (emoji,price))
+				c.execute('SELECT ROWID FROM sell_offers WHERE name = ? and price = ?', (emoji, price))
+				a = c.fetchone()
+				c.execute('DELETE FROM sell_offers WHERE ROWID = ?', (str(a[0]),))
+				conn.commit()
+				#await remove_item_from_inventory(str(rows[1]), emoji, "1")
+				await add_item_to_inventory(user_id, emoji, "1")
+				await remove_credits_real(user_id, str(rows[2]))
+				await bot.say("Success!")
+			else:
+				await bot.say("You don't have enough money to buy that! You have %s credits, you need %s more." % (str(cr), str(int(rows[2]) - int(cr))))
 		else:
-			await bot.say("You don't have enough money to buy that! You have %s credits, you need %s more." % (str(cr), str(int(rows[2]) - int(cr))))
+			await bot.say("No offer at that price for that emoji!")
 	else:
-		await bot.say("No offer at that price for that emoji!")
+		c.execute("SELECT name,user_id,price FROM sell_offers WHERE name = ? ORDER BY price ASC;", (emoji))
+		rows = c.fetchone()
+		print(str(rows))
+		if rows:
+			cr = "re"
+			cr = await get_credits(user_id)
+			if int(cr) > rows[2]:
+				await add_credits_real(str(rows[1]), str(rows[2]))
+				#c.execute('DELETE FROM sell_offers WHERE name = ? and price = ? LIMIT 1;', (emoji,price))
+				c.execute('SELECT ROWID FROM sell_offers WHERE name = ?', (emoji))
+				a = c.fetchone()
+				c.execute('DELETE FROM sell_offers WHERE ROWID = ?', (str(a[0]),))
+				conn.commit()
+				#await remove_item_from_inventory(str(rows[1]), emoji, "1")
+				await add_item_to_inventory(user_id, emoji, "1")
+				await remove_credits_real(user_id, str(rows[2]))
+				await bot.say("Success!")
+			else:
+				await bot.say("You don't have enough money to buy that! You have %s credits, you need %s more." % (str(cr), str(int(rows[2]) - int(cr))))
+		else:
+			await bot.say("No offer at that price for that emoji!")
 	#except:
 	#	await bot.say("No offers for that emoji at that price!")
 
@@ -271,7 +294,7 @@ async def remove_credits_real(user_id, amount):
 		c.execute("UPDATE players SET balance = balance - ? WHERE user_id = ?", (amount, user_id))
 		print("Had to update; not insert")
 	conn.commit()
-	
+
 	#except:
 	#	await bot.say("Errored; check your command")
 
@@ -290,13 +313,13 @@ async def inv(ctx, user_id=None):
 	rows = await get_inv_by_id(user_id)
 	credits = await get_credits(user_id)
 	credits = str(credits)
-	global cred_emoji	
+	global cred_emoji
 	cred_emoji_temp = cred_emoji
 	if user_id == "247096918923149313":
-		
+
 		cred_emoji = ":yen:"
 
-	
+
 	if not rows:
 		await bot.say("I am sorry, but " + await username(user_id) + " has no items in their inventory!\n**Their Ectoplasm balance is " + cred_emoji + " " + credits + ".**")
 	else:
